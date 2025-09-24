@@ -1400,4 +1400,118 @@ input:focus{box-shadow: 0px 0px 19px -11px rgba(32, 34, 30, 0.692) inset;}
     100% {
         transform: translateX(10px) translateY(5px);
     }
+
+}
+/* Мобильная оптимизация */
+.container-mobile {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+/* Основная карта - адаптивная */
+#main-map {
+    width: 100% !important;
+    height: 70vh !important;
+    min-height: 400px;
+    max-height: 600px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+/* Навигация для мобильных */
+.navigation {
+    background-color: rgba(0, 255, 115, 0.25);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.144);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+    box-sizing: border-box;
+}
+
+/* Заголовок для мобильных */
+.waviy span {
+    font-size: 24px !important;
+}
+
+/* Адаптация для телефонов */
+@media (max-width: 768px) {
+    body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .container-mobile {
+        padding: 0 5px;
+    }
+    
+    #main-map {
+        height: 60vh !important;
+        min-height: 300px;
+        border-radius: 8px;
+    }
+    
+    .navigation {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 8px;
+    }
+    
+    .waviy span {
+        font-size: 20px !important;
+    }
+    
+    .card3 {
+        margin: 5px 0;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    #main-map {
+        height: 50vh !important;
+        min-height: 250px;
+    }
+    
+    .waviy span {
+        font-size: 18px !important;
+    }
+    
+    .navigation-header h1 {
+        margin: 10px 0;
+    }
+    
+    .hrblack {
+        margin: 10px 0;
+    }
+}
+
+/* Убираем старые фиксированные стили */
+.cdiv1, .fix-size2, .ml10 {
+    width: 100% !important;
+    margin-left: 0 !important;
+    display: block !important;
+    height: auto !important;
+    min-height: auto !important;
+}
+
+/* Улучшаем читаемость на мобильных */
+.navigation-header h1 {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    margin: 15px 0;
+}
+
+/* Оптимизация карты для touch устройств */
+#main-map .ymaps-2-1-79-map {
+    -webkit-tap-highlight-color: transparent;
+}
+
+#main-map .ymaps-2-1-79-controls__control {
+    touch-action: manipulation;
 }
