@@ -27,12 +27,26 @@ function initMaps() {
     backgroundMap.behaviors.disable('dblClickZoom');
     backgroundMap.behaviors.disable('rightMouseButtonMagnifier');
     
-    // Создаем основную карту
+    // Создаем основную карту с адаптивными настройками
     var mainMap = new ymaps.Map('main-map', {
         center: dubovoeCoordinates,
         zoom: 14,
         controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+    }, {
+        // Адаптивные настройки для мобильных
+        suppressMapOpenBlock: false,
+        suppressObsoleteBrowserNotifier: true
     });
+    
+    // Оптимизация для мобильных устройств
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // Упрощаем поведение карты на мобильных
+        mainMap.behaviors.disable('drag');
+        mainMap.behaviors.enable('multiTouch');
+        
+        // Увеличиваем зону клика для меток на мобильных
+        ymaps.options.set('size', 'small');
+    }
     
     // Данные точек из вашего CSV
     var pointsData = [
@@ -61,9 +75,14 @@ function initMaps() {
     // Создаем кластеризатор для точек
     var clusterer = new ymaps.Clusterer({
         preset: 'islands#invertedRedClusterIcons',
-        clusterDisableClickZoom: false,
+        clusterDisableClickZoom: true, // Упрощаем на мобильных
         clusterOpenBalloonOnClick: true,
-        groupByCoordinates: false
+        groupByCoordinates: false,
+        // Оптимизация для мобильных
+        clusterIconLayout: 'default#imageWithContent',
+        clusterIconImageHref: 'https://yastatic.net/iconostasis/_/8lFaf8U0jJQ6G2d6-ih-269sPyo.png',
+        clusterIconImageSize: [40, 40],
+        clusterIconImageOffset: [-20, -20]
     });
     
     // Создаем массив меток
@@ -72,12 +91,17 @@ function initMaps() {
     // Создаем метки для каждой точки
     pointsData.forEach(function(point) {
         var placemark = new ymaps.Placemark(point.coords, {
-            balloonContentHeader: point.label,
-            balloonContentBody: 'Радиационный фон: ' + point.number,
+            balloonContentHeader: '<div style="font-size: 14px; margin-bottom: 10px;">' + point.label + '</div>',
+            balloonContentBody: '<div style="font-size: 16px; font-weight: bold; color: #ff0000;">Радиационный фон: ' + point.number + ' мкЗв/ч</div>',
             hintContent: point.label
         }, {
             preset: 'islands#blueCircleIcon',
-            iconColor: '#ff0000' // Красный цвет для лучшей видимости
+            iconColor: '#ff0000', // Красный цвет для лучшей видимости
+            // Увеличиваем размер меток для мобильных
+            iconLayout: 'default#imageWithContent',
+            iconImageHref: 'https://yastatic.net/iconostasis/_/8lFaf8U0jJQ6G2d6-ih-269sPyo.png',
+            iconImageSize: [32, 32],
+            iconImageOffset: [-16, -16]
         });
         
         placemarks.push(placemark);
@@ -89,15 +113,29 @@ function initMaps() {
     // Добавляем кластеризатор на карту
     mainMap.geoObjects.add(clusterer);
     
+    // Адаптивный обработчик ресайза
+    function handleResize() {
+        setTimeout(function() {
+            if (mainMap.container && typeof mainMap.container.fitToViewport === 'function') {
+                mainMap.container.fitToViewport();
+            }
+            syncMaps();
+        }, 100);
+    }
+    
     // Функция синхронизации карт
     function syncMaps() {
-        var mainCenter = mainMap.getCenter();
-        var mainZoom = mainMap.getZoom();
-        
-        // Плавно синхронизируем фоновую карту
-        backgroundMap.setCenter(mainCenter, mainZoom, {
-            duration: 300
-        });
+        try {
+            var mainCenter = mainMap.getCenter();
+            var mainZoom = mainMap.getZoom();
+            
+            // Плавно синхронизируем фоновую карту
+            backgroundMap.setCenter(mainCenter, mainZoom, {
+                duration: 300
+            });
+        } catch (e) {
+            console.log('Ошибка синхронизации карт:', e);
+        }
     }
     
     // Синхронизация при изменении масштаба
@@ -113,19 +151,26 @@ function initMaps() {
         syncMaps();
     });
     
-    // Синхронизация при изменении размера окна
-    window.addEventListener('resize', function() {
-        setTimeout(syncMaps, 100);
-    });
+    // Обработчик ресайза окна
+    window.addEventListener('resize', handleResize);
     
-    console.log('Карты инициализированы со всеми точками из конструктора');
+    // Инициализация размера при загрузке
+    setTimeout(handleResize, 500);
     
-    // Автоматически открываем баллун с первой точкой при загрузке
-    setTimeout(function() {
-        if (placemarks.length > 0) {
-            placemarks[0].balloon.open();
-        }
-    }, 2000);
+    console.log('Карты инициализированы с мобильной оптимизацией');
+    
+    // Автоматически открываем баллун с первой точкой при загрузке (только на десктопе)
+    if (!/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        setTimeout(function() {
+            if (placemarks.length > 0) {
+                try {
+                    placemarks[0].balloon.open();
+                } catch (e) {
+                    console.log('Не удалось открыть баллун:', e);
+                }
+            }
+        }, 2000);
+    }
 }
 
 // Функция для создания радиоактивных частиц
@@ -136,8 +181,9 @@ function createRadioactiveParticles() {
         return;
     }
     
-    // Количество частиц (можно настроить)
-    const particleCount = 80;
+    // Количество частиц (меньше на мобильных для производительности)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const particleCount = isMobile ? 40 : 80;
     
     // Создаем частицы
     for (let i = 0; i < particleCount; i++) {
@@ -197,11 +243,28 @@ function createRadiationGlow() {
     document.body.appendChild(glow);
 }
 
-// Пересоздаем частицы при изменении размера окна
+// Пересоздаем частицы при изменении размера окна (с оптимизацией)
+let resizeTimeout;
 window.addEventListener('resize', function() {
-    const particlesContainer = document.getElementById('radioactive-particles');
-    if (particlesContainer) {
-        particlesContainer.innerHTML = '';
-        setTimeout(() => createRadioactiveParticles(), 100);
-    }
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        const particlesContainer = document.getElementById('radioactive-particles');
+        if (particlesContainer) {
+            particlesContainer.innerHTML = '';
+            setTimeout(() => createRadioactiveParticles(), 100);
+        }
+    }, 250);
 });
+
+// Оптимизация для мобильных устройств - отключаем тяжелые эффекты при низкой производительности
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // Проверяем производительность и при необходимости упрощаем эффекты
+    setTimeout(() => {
+        const particlesContainer = document.getElementById('radioactive-particles');
+        if (particlesContainer && particlesContainer.children.length > 50) {
+            // Если слишком много частиц, уменьшаем их количество для производительности
+            particlesContainer.innerHTML = '';
+            createRadioactiveParticles();
+        }
+    }, 3000);
+}
