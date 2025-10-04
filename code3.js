@@ -126,6 +126,7 @@ function initMaps() {
             placemarks[0].balloon.open();
         }
     }, 2000);
+    
 }
 
 // Функция для создания радиоактивных частиц
