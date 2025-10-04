@@ -1401,3 +1401,82 @@ input:focus{box-shadow: 0px 0px 19px -11px rgba(32, 34, 30, 0.692) inset;}
         transform: translateX(10px) translateY(5px);
     }
 }
+.cdiv1 {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: 0;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+/* Основная карта - адаптивная */
+#main-map {
+    width: 100% !important;
+    height: 70vh;
+    min-height: 400px;
+    max-height: 800px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+/* Контейнер для карты */
+.card3 {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Навигация */
+.navigation {
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Улучшенная адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    body.ml10 {
+        margin-left: 0;
+    }
+    
+    .cdiv1 {
+        padding: 0 5px;
+    }
+    
+    #main-map {
+        height: 60vh;
+        min-height: 300px;
+        border-radius: 8px;
+    }
+    
+    .card3 {
+        padding: 5px;
+    }
+    
+    .waviy span {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    #main-map {
+        height: 50vh;
+        min-height: 250px;
+        border-radius: 5px;
+    }
+    
+    .waviy span {
+        font-size: 20px;
+    }
+    
+    .navigation {
+        padding: 5px;
+    }
+}
+
+/* Гарантия, что карта всегда видна */
+.ymaps-2-1-79-map {
+    width: 100% !important;
+    height: 100% !important;
+}
